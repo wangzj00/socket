@@ -31,7 +31,7 @@ public class NIOClient {
  */
 class TimeClientHandle implements Runnable{
 	private String host;
-	private int port; 
+	private int port;
 	private Selector selector;
 	private SocketChannel socketChannel;
 	private volatile boolean stop;
