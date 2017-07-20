@@ -79,7 +79,7 @@ class TimeClientHandle implements Runnable{
 				e.printStackTrace();
 				System.exit(1);
 			}
-		}
+		} 
 		//多路复用器关闭后所有注册在上面的Channel,Pipe等资源都会被自动注册并关闭,所以并不需要重复去释放资源,jdk底层会自动释放所有跟该多路复用器关联的资源
 		if(selector != null){
 			try {
