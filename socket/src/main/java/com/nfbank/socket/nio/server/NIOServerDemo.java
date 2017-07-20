@@ -26,8 +26,7 @@ public class NIOServerDemo {
 		ServerSocketChannel acceptorSvr = ServerSocketChannel.open();
 
 		// 2.绑定监听端口,设置连接为非阻塞
-		acceptorSvr.socket().bind(
-				new InetSocketAddress(InetAddress.getLocalHost(), port));
+		acceptorSvr.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(), port));
 		acceptorSvr.configureBlocking(false);
 		
 		// 3.创建Reactor线程,创建多路复用器并启动线程
