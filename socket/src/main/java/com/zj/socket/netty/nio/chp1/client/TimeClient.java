@@ -1,4 +1,4 @@
-package com.zj.socket.netty.nio.client;
+package com.zj.socket.netty.nio.chp1.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
