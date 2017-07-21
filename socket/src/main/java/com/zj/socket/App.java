@@ -1,4 +1,4 @@
-package com.nfbank.socket;
+package com.zj.socket;
 
 /**
  * Hello world!

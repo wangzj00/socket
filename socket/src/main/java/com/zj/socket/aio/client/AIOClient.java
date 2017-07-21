@@ -1,4 +1,4 @@
-package com.nfbank.socket.aio.client;
+package com.zj.socket.aio.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

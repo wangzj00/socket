@@ -1,4 +1,4 @@
-package com.nfbank.socket.bio.client;
+package com.zj.socket.bio.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;

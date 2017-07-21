@@ -1,4 +1,4 @@
-package com.nfbank.socket.netty.nio.server;
+package com.zj.socket.netty.nio.tcp粘包;
 
 
 import java.util.Date;
@@ -15,9 +15,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 
 /**
- * 基于Netty的NIO服务端代码
+ * 基于Netty的NIO服务端代码,模拟tcp粘包
  * @author wangzj
  *
  */
@@ -66,7 +68,18 @@ public class TimeServer {
 
 		@Override
 		protected void initChannel(SocketChannel ch) throws Exception {
+			/*
+			 * 通过添加LineBasedFrameDecoder和StringDecoder则两个解码器来解决TCP粘包问题
+			 * LineBasedFrameDecoder会遍历ByteBuf中的"\r" 或者"\r\n" ,如果有就算作一行,构造参数为支持的一行的最大长度
+			 */
+			ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
+			/*
+			 * StringDecoder是将接收到的参数转换成字符串
+			 */
+			ch.pipeline().addLast(new StringDecoder());
+			
 			ch.pipeline().addLast(new TimeServerHandler());
+			
 
 		}
 
@@ -80,6 +93,8 @@ public class TimeServer {
  */
 class TimeServerHandler extends ChannelHandlerAdapter {
 
+	private int counter;
+	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		/*
@@ -91,14 +106,23 @@ class TimeServerHandler extends ChannelHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		
-		ByteBuf buf = (ByteBuf)msg;//类似于jdk中的ByteBuffer对象
+		/*ByteBuf buf = (ByteBuf)msg;//类似于jdk中的ByteBuffer对象
 		byte[] req = new byte[buf.readableBytes()];	//获得缓冲区的可读字节数
 		buf.readBytes(req);
-		String body = new String(req, "utf-8");
-		System.out.println("The time server receive order : " + body);
+		String body = new String(req, "utf-8").substring(0, req.length-System.getProperty("line.separator").length());
+		System.out.println("The time server receive order : " + body + " ; the counter is : " + ++counter);
 		String currentTime = "QUERY TIME ORDER".equals(body) ? new Date().toString() : "BAD ORDER";
+		currentTime = currentTime + System.getProperty("line.separator");
 		ByteBuf resp = Unpooled.copiedBuffer(currentTime.getBytes());
-		ctx.write(resp);
+		ctx.writeAndFlush(resp);*/
+		
+		//解决TCP粘包问题
+		String body = (String) msg;
+		System.out.println("The time server receive order : " + body + " ; the counter is : " + ++counter);
+		String currentTime = "QUERY TIME ORDER".equals(body) ? new Date().toString() : "BAD ORDER";
+		currentTime = currentTime + System.getProperty("line.separator");
+		ByteBuf resp = Unpooled.copiedBuffer(currentTime.getBytes());
+		ctx.writeAndFlush(resp);
 	}
 
 	@Override
