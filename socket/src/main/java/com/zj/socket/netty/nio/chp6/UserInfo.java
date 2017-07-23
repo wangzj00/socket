@@ -3,15 +3,18 @@ package com.zj.socket.netty.nio.chp6;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
+import org.msgpack.annotation.Message;
+
 /**
  * 测试序列化成字节数组的大小
  * 
  * @author wangzj
  *
  */
-public class UserInfo implements Serializable {
+@Message
+public class UserInfo{
 
-	private static final long serialVersionUID = -6891143772542101986L;
+	//private static final long serialVersionUID = -6891143772542101986L;
 
 	private String userName;
 	private int userID;

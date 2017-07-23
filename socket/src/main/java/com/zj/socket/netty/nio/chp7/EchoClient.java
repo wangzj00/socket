@@ -10,6 +10,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 import com.zj.socket.netty.nio.chp6.UserInfo;
 public class EchoClient {
@@ -29,10 +31,11 @@ public class EchoClient {
             b.group(group).channel(NioSocketChannel.class)
             .option(ChannelOption.TCP_NODELAY, true)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+            .handler(new LoggingHandler(LogLevel.WARN))
             .handler(new ChannelInitializer<SocketChannel>(){
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
-                    //LengthFieldBasedFrameDecoder用于处理半包消息
+                	//LengthFieldBasedFrameDecoder用于处理半包消息
                     //这样后面的MsgpackDecoder接收的永远是整包消息
                     //ch.pipeline().addLast("frameDecoder",new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
                     ch.pipeline().addLast("msgpack decoder",new MsgpackDecoder());
@@ -51,7 +54,7 @@ public class EchoClient {
     }
     public static void main(String[] args) throws Exception{
         int port=8080;
-        new EchoClient(port,"127.0.0.1",1).run();
+        new EchoClient(port,"127.0.0.1",20).run();
     }
 }
 class EchoClientHandler extends ChannelHandlerAdapter{
@@ -61,15 +64,14 @@ class EchoClientHandler extends ChannelHandlerAdapter{
         this.sendNumber=sendNumber;
     }
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx){
-        UserInfo [] infos = UserInfo();
-        for(UserInfo infoE : infos){
-           // ctx.write(infoE);
-        	ctx.writeAndFlush(infoE);
-        }
-        //ctx.flush();
-    }
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) {
+		UserInfo[] infos = UserInfo();
+		for (UserInfo infoE : infos) {
+			ctx.writeAndFlush(infoE);
+		}
+		//ctx.flush();
+	}
     private UserInfo[] UserInfo(){
         UserInfo [] userInfos=new UserInfo[sendNumber];
         UserInfo userInfo=null;

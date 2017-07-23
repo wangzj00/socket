@@ -7,6 +7,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 
 import org.msgpack.MessagePack;
+import org.msgpack.template.Templates;
 
 /**
  * messagepack解码器
@@ -21,19 +22,12 @@ public class MsgpackDecoder extends MessageToMessageDecoder<ByteBuf>{
 	 */
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-		/*final byte[] array;
-		final int length = byteBuf.readableBytes();
+		final byte[] array;
+		final int length = msg.readableBytes();
 		array = new byte[length];
-		byteBuf.getBytes(byteBuf.readerIndex(), array, 0, length);
+		msg.getBytes(msg.readerIndex(), array, 0, length);
 		
 		MessagePack msgPack = new MessagePack();
-		out.add(msgPack.read(array));*/
-		final byte[] array;  
-        final int length = msg.readableBytes();  
-        array = new byte[length];
-        System.out.println(msg.readableBytes());
-        msg.getBytes(0, array, 0, length);  
-        MessagePack msgPack = new MessagePack();  
-        out.add(msgPack.read(array)); 
+		out.add(msgPack.read(array));
 	}
 }

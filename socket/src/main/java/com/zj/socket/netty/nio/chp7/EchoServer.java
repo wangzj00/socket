@@ -13,16 +13,13 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-import java.util.List;
-
-import com.zj.socket.netty.nio.chp6.UserInfo;
-
 public class EchoServer {
 
 	private static final int port = 8080;
 	
 	public static void main(String[] args) throws Exception {
 		new EchoServer().bind(port);
+		
 	}
 	
 	public void bind(int port) throws Exception {
@@ -33,7 +30,7 @@ public class EchoServer {
 			ServerBootstrap b = new ServerBootstrap();
 			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
 					.option(ChannelOption.SO_BACKLOG, 100)
-					.handler(new LoggingHandler(LogLevel.INFO))
+					.handler(new LoggingHandler(LogLevel.WARN))
 					.childHandler(new ChannelInitializer<SocketChannel>() {
 	
 						@Override
@@ -66,14 +63,18 @@ class EchoServerHandler extends ChannelHandlerAdapter{
 		ctx.close();// 发生异常,关闭链路
 	}
 
+	/**
+	 * 此处接收到的消息该怎么强制类型转换?
+	 */
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg)
-			throws Exception {
-		System.out.println("服务端收到消息" + msg);
-		//@SuppressWarnings("unchecked")
-		//List<UserInfo> body = (List<UserInfo>)msg;
-		//System.out.println("Server receive the msgpack : [userId=" + body.get(0).getUserID() + ",userName="+body.get(0).getUserName()+"]");
-		//ctx.writeAndFlush(body);
+	public void channelRead(ChannelHandlerContext ctx, Object msg)throws Exception {
+		System.out.println(msg);
+		//ctx.writeAndFlush(msg.toString() + "--server");
+		//(ArrayValue)msg;
+		/*@SuppressWarnings("unchecked")
+		List<Object> body = (List<Object>)msg;
+		System.out.println("Server receive the msgpack : [userId=" + ((UserInfo)body.get(0)).getUserID() + ",userName="+((UserInfo)body.get(0)).getUserName()+"]");
+		ctx.writeAndFlush(body);*/
 		
 		
 	}
