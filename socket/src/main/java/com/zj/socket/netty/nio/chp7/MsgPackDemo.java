@@ -15,6 +15,8 @@ public class MsgPackDemo {
 
 	public static void main(String[] args) throws Exception {
 		List<String> src = new ArrayList<String>(){
+			private static final long serialVersionUID = 1L;
+
 			{
 				add("abc");
 				add("def");

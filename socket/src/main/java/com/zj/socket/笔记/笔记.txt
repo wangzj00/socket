@@ -43,7 +43,7 @@ LineBasedFrameDecoder的工作原理是它一次遍历ByteBuf中的可读字节,
 结束符两种解码方式,同时支持配置单行的最大长度.如果连续读取到的最大长度后仍然没有发现换行符,就会抛出异常,同时忽略掉执勤啊独到的异常码流.
 StringDecoder的功能非常简单,就是将接收到的对象转换成字符串,然后继续调用后面的Handler.LineBasedFrameDecoder+StringDecoder组合就是按行切换的文本解码器,它被设计用来支持TCP的粘包和拆包.
 
-CHP5分隔符和定长解码器的应用
+CHP5 分隔符和定长解码器的应用
 	TCP以流的方式进行数据传输,的上层应用协议为了对消息进行区分,采用以下四种方式:
 		1.消息长度固定,累计读取到消息长度为LEN的报文后就认为读到一个完整的消息;将计数器置位,重新开始读取下一个消息.
 		2.将回车换行符作为消息结束符,例如FTP协议,这种方式在文本协议中应用比较广泛.
@@ -52,7 +52,7 @@ CHP5分隔符和定长解码器的应用
 	Netty对以上4种应用做了统一的抽象,提供四种解码器来解决对应的问题.
 	本章学习:DelimiterBasedFrameDecoder和FixedLengthFrameDecoder解码器,前者可以自动完成分割符做标志的消息解码,后者可以完成定长消息的解码.他们都能解决TCP粘包/拆包导致的读半包的问题.
 	利用FixedLengthFrameDecoder进行解码,无论一次收到多少数据报,都会按照构造函数中设置的长度进行解码,如果是半包消息,FixedLengthFrameDecoder会缓存半包消息并等待下个包到达后进行拼包,知道读取到一个完整的数据包.
-CHP6编解码技术:
+CHP6 编解码技术:
 	基于java提供的对象输入输出流ObjectInputStream和ObjectOutputStream,可以直接把java中的对象作为可存储的字节写入文件,也可以传输到网络上.对于开发人员来说,基于这种方式可以避免碰触底层数组,从而提升效率.
 	java序列化的目的主要有两个:1. 网络传输2. 对象持久化
 	当进行跨进程服务调用时,需要把被传输的java对象编码为字节数组或者ByteBuffer对象,反之亦然.这被成为java对象的编解码技术.
@@ -99,9 +99,30 @@ CHP6编解码技术:
 		4.无需实现Serializable接口,即可实现java序列化;
 		5.通过缓存技术提升对象序列化性能.
 	相比于前两种编解码框架,JBoss Marshalling更多是在JBoss内部使用,应用范围有限.	
-	CHP7MessagePack编解码:高效的二进制序列化框架,它像json一样支持不同语言间的数据交换,但是性能更快,序列化后的码流也更小.
-		支持的语言:java,Python,Ruby,Haskell,c#,OCaml,Lua,Go,C,C++等.官网:http://msgpack.org/
-		利用MessagePack做编解码工作,需要考虑半包处理问题.
+CHP7 MessagePack编解码:高效的二进制序列化框架,它像json一样支持不同语言间的数据交换,但是性能更快,序列化后的码流也更小.
+	支持的语言:java,Python,Ruby,Haskell,c#,OCaml,Lua,Go,C,C++等.官网:http://msgpack.org/
+	利用MessagePack做编解码工作,需要考虑半包处理问题.
+		LengthFieldPrepender(如果在编码器之前增加该Handler,那么将在ByteBuf之前增加n个字节的消息长度字段)和
+		LengthFieldBasedFrameDecoder(在解码器之前增加该Handler)解决TCP粘包的问题.后续章节会专门讲解这两个类的工作原理.
+CHP8 Google Protobuf编解码
+	 灵活,高效,结构化的数据序列化框架
+	 环境搭建:
+	windows下:下载protoc-3.0.0-win32.zip压缩包,解压,配置环境变量path路径的protoc.exe,书写.proto文件(按照默认的proto2语法书写),然后按照命令protoc.exe --java_out=. SubscribeReq.proto生成java文件
+	java中引入生成的java文件,导入protobuf-java.jar文件依赖,至此,开发环境搭建完毕!
+	
+	下面进行Protobuf编解码开发:
+		Protobuf支持复杂的POJO对象的编解码,所有的代码都是通过工具自动生成,相比于传统的POJO对象的赋值操作,其实用略微复杂一些,但是西瓜后也不会带来额外的工作量,主要是编程习惯的不同.Protobuf的编解码接口非常简单实用,但是功能和性能却非常强大,这也是它流行的一个重要原因.
+		利用Netty 提供的Protobuf编解码能力,不需要了解Protobuf实现和使用的细节的情况下轻松支持Protobuf的编解码,可以方便的实现跨语言的远程服务调用和周边的异构系统进行通信对接.
+	Protobuf的使用注意事项:
+		ProtobufDecoder仅仅负责解码,不支持读半包.因此在ProtobufDecoder前面一定要有处理半包的解码器,有以下三种:
+			1.使用Netty提供的ProtobufVarint32FrameDecoder,可以处理半包消息;
+			2.继承Netty提供的通用半包解码器LengthFieldBasedFrameDecoder;
+			3.继承ByteToMessageDecoder类,自己处理半包消息.
+		如果你只使用ProtobufDecoder解码器而忽略对半包消息的处理,程序是不能正常工作的.程序会报错!(这个使用陷阱要注意)
+CHP9 JBoss Marshalling编解码: 是一个java对象序列化包,对jdk默认的序列化框架进行了优化,但又保持跟Serializable接口的兼容,同时增加了一些可调的参数和附加特性,这些参数和特性可通过工厂进行配置.
+	1.由于只用到序列化类库,故只需要jboss-marshalling-serial.jar和jboss-marshalling.jar两个依赖库
+			
+	
 		
 		
 		

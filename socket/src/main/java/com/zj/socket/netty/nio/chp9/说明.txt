@@ -1,0 +1,1 @@
+本章示例JBoss Marshalling结合Netty做序列化和反序列化
