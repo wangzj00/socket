@@ -152,6 +152,7 @@ CHP10 HTTP协议开发应用
 			消息报头:响应报头允许服务器传递不能放在状态行中的附加响应信息,以及关于服务器的信息和对Request-URI所标识的资源进行下一步访问的信息;常见的响应报头:Location,Server,WWW-authenticate,
 			响应正文.
 	10.2 Netty HTTP服务端开发
+	
 					
 			
 			

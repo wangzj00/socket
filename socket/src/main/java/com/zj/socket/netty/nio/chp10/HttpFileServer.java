@@ -44,7 +44,7 @@ import javax.activation.MimetypesFileTypeMap;
  */
 public class HttpFileServer {
 
-	private static final String DEFAULT_URL = "/src/main/java/com/zj/socket/";
+	private static final String DEFAULT_URL = "/";
 	
 	public static void main(String[] args) throws Exception {
 		new HttpFileServer().run(DEFAULT_URL, 8080);
@@ -97,20 +97,17 @@ public class HttpFileServer {
  *
  */
 class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>{
-	private final static String CONTENT_TYPE = io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE.toString();
-	private final static String LOCATION = io.netty.handler.codec.http.HttpHeaders.Names.LOCATION.toString();
-	private final static String CONNECTION = io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION.toString();
+	private final static String CONTENT_TYPE = HttpHeaders.Names.CONTENT_TYPE.toString();
+	private final static String LOCATION = HttpHeaders.Names.LOCATION.toString();
+	private final static String CONNECTION = HttpHeaders.Names.CONNECTION.toString();
 	private final String url;
 	
 	public HttpFileServerHandler(String url){
 		this.url = url;
 	}
-	/**
-	 * 当用户在浏览器上打开链接，点击超链接直接打开或者下载文件时就会访问这个方法。
-	 */
+	
 	@Override
-	protected void messageReceived(ChannelHandlerContext ctx, FullHttpRequest request)
-			throws Exception {
+	protected void messageReceived(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
 		/**
 		 *  这是对请求消息进行解码，如果解码失败，直接HTTP 400错误返回
 		 *	
@@ -123,7 +120,7 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 			return;
 		}
 		/**
-		 * 如果不是从浏览器或者Get请求，刚直接HTTP 405错误返回
+		 * 如果不是从浏览器或者Get请求，直接HTTP 405错误返回
 		 * 
 		 * METHOD_NOT_ALLOWED = new HttpResponseStatus(405, "Method Not Allowed", true);
 		 * 
@@ -135,7 +132,9 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 		}
 		
 		final String uri = request.getUri();
-		final String path = sanitizeUri(uri, url);//看方法的注释
+		
+		final String path = sanitizeUri(uri);//看方法的注释
+		System.out.println("本次请求路径: " + path);
 		/**
 		 * 如果构造的uri不合法，则返回HTTP 403错误。
 		 * 403 资源不可用错误。
@@ -242,19 +241,22 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 	 * @param uri
 	 * @return
 	 */
-	private String sanitizeUri(String uri, String baseUrl){
+	private String sanitizeUri(String uri){
+		if(uri == null) {
+			return null;
+		}
+		
 		try {
 			uri  = URLDecoder.decode(uri,"UTF-8");
 		} catch (Exception e) {
 			try {
 				uri = URLDecoder.decode(uri,"ISO-8859-1");
 			} catch (Exception e2) {
-				throw new Error();
+				throw new Error(e2);
 			}
 		}
-		if(!uri.startsWith(url)){
-			return null;
-		}
+		uri = url.substring(1) + uri;
+		
 		if(!uri.startsWith("/")){
 			return null;
 		}
@@ -266,8 +268,8 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 				||uri.endsWith(".")||INSECURE_URI.matcher(uri).matches()){
 			return null;
 		}
-		System.out.println("url封装后值: " + (System.getProperty("user.dir") + File.separator + baseUrl + uri));
-		return System.getProperty("user.dir") + File.separator + baseUrl + uri;
+		
+		return System.getProperty("user.dir") + File.separator + uri;
 	}
 	
 	private static final Pattern ALLOWEN_FILE_NAME = Pattern.compile("[A-Za-z0-9][-_A-Za-z0-9\\.]*");
@@ -295,7 +297,7 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 		buf.append("<ul>");
 		buf.append("<li>链接：<a href=\"../\">..</a></li>\r\n");
 		//下面展示根目录下的所有文件夹和文件，同时使用超连接来表示
-		for(File f:dir.listFiles()){
+		for(File f : dir.listFiles()){
 			if(f.isHidden()||!f.canRead()){
 				continue;
 			}
@@ -305,9 +307,14 @@ class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 				continue;
 			}
 			buf.append("<li>链接：<a href=\"");
-			buf.append("/");
+			buf.append(dirPath);
+			buf.append(File.separator);
 			buf.append(name);
-			buf.append("/");
+			if(f.isFile()){
+				
+			}else{
+				buf.append("/");
+			}
 			buf.append("\">");
 			buf.append(name);
 			buf.append("</a></li>\r\n");
