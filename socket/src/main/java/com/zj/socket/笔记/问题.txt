@@ -1,3 +1,4 @@
 1.使用MessagePack做编解码器时候服务端该怎么接收对象类型?该怎么处理?chp7章节的代码中为什么接收不到对象类型的实体,是因为MessagePack的用法的问题吗?
 	对于代码执行断点调试的时候服务端丢消息,客户端接收的响应信息不全.是因为什么?MessagePack框架中的@Message注解的作用
 2.使用ChannelHandler通道处理器有顺序要求吗?答案:有!一定有顺序要求,是按照这个顺序进行处理的!
+3.JBoss Marshalling集成Netty也无法接收发送消息,似乎和MessagePack一样,不知道问题出现在哪里?

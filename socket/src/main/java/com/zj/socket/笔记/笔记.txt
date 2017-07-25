@@ -121,6 +121,39 @@ CHP8 Google Protobuf编解码
 		如果你只使用ProtobufDecoder解码器而忽略对半包消息的处理,程序是不能正常工作的.程序会报错!(这个使用陷阱要注意)
 CHP9 JBoss Marshalling编解码: 是一个java对象序列化包,对jdk默认的序列化框架进行了优化,但又保持跟Serializable接口的兼容,同时增加了一些可调的参数和附加特性,这些参数和特性可通过工厂进行配置.
 	1.由于只用到序列化类库,故只需要jboss-marshalling-serial.jar和jboss-marshalling.jar两个依赖库
+
+---------------------高级篇 Netty多协议开发和应用---------------------------------
+CHP10 HTTP协议开发应用
+	WEB开发的主流协议,本章介绍如何基于Netty的HTTP协议栈进行HTTP服务端和客户端开发.由于Netty的HTTP协议栈是基于NIO通信框架开发的,因此,Netty的HTTP协议也是异步非阻塞的.
+	10.1 http协议介绍:应用层的面向对象的协议,由于其简洁,快速的方式,适用于分布式超媒体系统.
+		http特点如下:	1.支持Client/Server模式
+					2.简单:URL携带请求参数或者消息体
+					3.灵活--HTTP协议允许传输任意类型的数据对象,传输类型由HTTP消息头中的Content-Type来标识.
+					4.无状态--HTTP协议是无状态协议,无状态是指协议对于事务处理没有记忆能力.缺少状态意味着如果后续处理需要之前的信息,则它必须重传,这样导致每次传输的数据量增大.另一方面,在服务器不需要先前的信息时它的应答就较快,负载较轻.
+		http请求消息:三部分:
+				http请求行:以一个方法符开头,以空格分开,后面跟着请求的URI和协议的版本,格式为:Method Request-URI HTTP-Version CRLF;请求方法:get(请求获取Request-URI所标识的资源),
+					post(在Request-URI所标识的资源后附加新的提交数据),head(请求获取有Request-URI所标识的资源的响应消息报文头),put(请求服务器存储的一个资源,并用Request-URI作为其标识),delete(请求服务器删除Request-URI所标识的资源),trace(请求服务器回送收到的请求消息,主要用于测试或者诊断),
+					connect(保留将来使用),options(请求查询服务器的性能,或者查询与资源相关的选项和需求);
+					*get和post请求的区别:
+						1)根据http规范,get用于信息获取,而且应该是安全的和幂等的;post则表示可能改变服务器上的资源的请求.
+						2)get提交,请求的数据会附在url之后.而post提交会把提交的数据防止在http消息的包体中,数据不会再地址栏中显示出来.
+						3)传输数据的大小不同,特定浏览器和服务器对URL长度有限制,例如IE对URL长度的限制是2083字节(2kb+35B),因此get携带的参数的长度会收到浏览器的限制;而post请求由于不是通过url传值,理论上数据长度不会受限制.
+						4)安全性.post的安全性要比get更高.除了地址栏传参后,使用get提交数据会造成Cross-site request forgery攻击.post提交消息是在消息体中所以不会有该问题.
+						
+				http消息头
+				http请求正文
+		http响应消息(HttpResponse),组成:
+			状态行:格式:HTTP-Version Status-Code Reason-Phrase CRLF,其中HTTP-Version标志服务端的协议版本,Status-Code标识服务端返回的响应状态码(三位数字组成,第一个数字定义了响应类别);
+				1xx:指示信息.表示请求已经接收,继续处理;
+				2xx:成功.标识请求已经被成功接收,理解,接受.
+				3xx:重定向.要完成请求必须进行更进一步的操作.
+				4xx:客户端错误.请求语法错误或者请求无法实现;
+				5xx:服务端错误.服务器未能处理请求.
+			消息报头:响应报头允许服务器传递不能放在状态行中的附加响应信息,以及关于服务器的信息和对Request-URI所标识的资源进行下一步访问的信息;常见的响应报头:Location,Server,WWW-authenticate,
+			响应正文.
+	10.2 Netty HTTP服务端开发
+					
+			
 			
 	
 		
