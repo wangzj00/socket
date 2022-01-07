@@ -40,7 +40,7 @@
 		<dependency>
 		    <groupId>com.google.protobuf</groupId>
 		    <artifactId>protobuf-java</artifactId>
-		    <version>3.0.0</version>
+		    <version>3.16.1</version>
 		</dependency>
 		
 		<!-- JBoss Marshalling 做序列化反序列化-->
